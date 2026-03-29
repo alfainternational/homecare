@@ -11,8 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('order_items', function (Blueprint $table) {
+        Schema::create('request_media', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('request_id')->constrained('service_requests')->cascadeOnDelete();
+            $table->foreignId('uploaded_by')->constrained('users')->cascadeOnDelete();
+            $table->string('path');
+            $table->enum('type', ['image', 'video']);
             $table->timestamps();
         });
     }
@@ -22,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('order_items');
+        Schema::dropIfExists('request_media');
     }
 };

@@ -59,9 +59,9 @@
         description: '',
         files: [],
         previews: [],
-        street: '{{ $user->address ?? '' }}',
-        district: '{{ $user->district ?? '' }}',
-        city: '{{ $user->city ?? 'الرياض' }}',
+        street: '{{ $user->primaryAddress?->street ?? '' }}',
+        district: '{{ $user->primaryAddress?->district ?? '' }}',
+        city: '{{ $user->primaryAddress?->city ?? 'الرياض' }}',
         notes: '',
         isDragging: false,
 
@@ -197,12 +197,12 @@
         @csrf
 
         {{-- Hidden inputs for Alpine state --}}
-        <input type="hidden" name="type" :value="serviceType" />
+        <input type="hidden" name="service_type" :value="serviceType" />
         <input type="hidden" name="description" :value="description" />
         <input type="hidden" name="street" :value="street" />
         <input type="hidden" name="district" :value="district" />
         <input type="hidden" name="city" :value="city" />
-        <input type="hidden" name="notes" :value="notes" />
+        <input type="hidden" name="client_notes" :value="notes" />
 
         {{-- ============================
              STEP 1: نوع الخدمة

@@ -199,6 +199,22 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        <div>
+                                            <label class="block text-xs font-bold text-[#2C2C2A] mb-1.5">التكلفة التقديرية <span class="text-gray-400 font-normal">(اختياري)</span></label>
+                                            <div class="relative">
+                                                <input type="number" name="estimated_cost" min="0" step="0.01"
+                                                       placeholder="250"
+                                                       value="{{ old('estimated_cost') }}"
+                                                       class="w-full text-sm border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-[#F5A623] bg-white">
+                                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">ر.س</span>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-bold text-[#2C2C2A] mb-1.5">قطع الغيار المطلوبة <span class="text-gray-400 font-normal">(سطر لكل قطعة)</span></label>
+                                            <textarea name="parts_needed" rows="2"
+                                                      placeholder="مثال:&#10;حنفية مطبخ&#10;خرطوم تصريف"
+                                                      class="w-full text-sm border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-[#F5A623] resize-none bg-white">{{ old('parts_needed') }}</textarea>
+                                        </div>
                                         <button type="submit"
                                                 class="w-full bg-[#F5A623] hover:bg-[#D4881A] text-white font-bold py-3 rounded-xl transition-colors text-sm shadow-sm">
                                             إرسال التقرير الأولي وبدء العمل

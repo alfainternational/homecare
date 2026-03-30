@@ -40,25 +40,38 @@ class ServiceRequestController extends Controller
 
     public function create()
     {
-        return view('client.requests.create');
+        $user = Auth::user()->load('primaryAddress');
+        return view('client.requests.create', compact('user'));
     }
 
     public function store(Request $request)
     {
         $data = $request->validate([
-            'service_type'  => 'required|in:plumbing,electrical,hvac,general',
+            // the form sends 'type' from Alpine hidden input; accept both
+            'service_type'  => 'nullable|in:plumbing,electrical,hvac,general',
+            'type'          => 'nullable|in:plumbing,electrical,hvac,general',
             'description'   => 'nullable|string|max:2000',
-            'client_notes'  => 'nullable|string|max:500',
-            'media'         => 'nullable|array|max:5',
+            'client_notes'  => 'nullable|string|max:1000',
+            'notes'         => 'nullable|string|max:1000',
+            'media'         => 'nullable|array|max:8',
             'media.*'       => 'file|mimes:jpg,jpeg,png,mp4,mov|max:20480',
             'street'        => 'nullable|string|max:255',
             'district'      => 'nullable|string|max:255',
+            'city'          => 'nullable|string|max:100',
         ]);
 
+        $serviceType = $data['service_type'] ?? $data['type'] ?? null;
+        if (!$serviceType) {
+            return back()->withErrors(['service_type' => 'يرجى اختيار نوع الخدمة.'])->withInput();
+        }
+
         $sr = ServiceRequest::create([
-            'service_type' => $data['service_type'],
+            'service_type' => $serviceType,
             'description'  => $data['description'] ?? null,
-            'client_notes' => $data['client_notes'] ?? null,
+            'client_notes' => $data['client_notes'] ?? $data['notes'] ?? null,
+            'street'       => $data['street'] ?? null,
+            'district'     => $data['district'] ?? null,
+            'city'         => $data['city'] ?? null,
             'client_id'    => Auth::id(),
             'status'       => 'pending',
         ]);
@@ -116,7 +129,10 @@ class ServiceRequestController extends Controller
             'comment' => 'nullable|string|max:500',
         ]);
 
-        // Update technician rating
+        // Save rating on the service request
+        $serviceRequest->update(['rating' => $request->rating]);
+
+        // Update technician profile rating average
         if ($serviceRequest->technician_id) {
             $profile = TechnicianProfile::where('user_id', $serviceRequest->technician_id)->first();
             if ($profile) {

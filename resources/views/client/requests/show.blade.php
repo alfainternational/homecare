@@ -229,13 +229,46 @@
                         </div>
                         @endif
 
-                        {{-- Special: Rating step --}}
+                        {{-- Special: Rating step — inline Alpine modal --}}
                         @if($i === 6 && $currentStatus === 'completed' && !$serviceRequest->rating)
-                        <div class="mt-3">
-                            <a href="{{ route('client.requests.rate', $serviceRequest) }}"
-                               class="inline-flex items-center gap-2 bg-yellow-400 hover:bg-yellow-500 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors">
+                        <div class="mt-3" x-data="{ rating: 0, open: false }">
+                            <button @click="open = true"
+                                    class="inline-flex items-center gap-2 bg-yellow-400 hover:bg-yellow-500 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors">
                                 ⭐ قيّم الخدمة الآن
-                            </a>
+                            </button>
+                            <div x-show="open" x-cloak
+                                 class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+                                 @click.self="open = false">
+                                <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm" @click.stop>
+                                    <h3 class="font-black text-gray-800 text-lg mb-1">قيّم الخدمة</h3>
+                                    <p class="text-sm text-gray-500 mb-5">تقييمك يساعدنا على تحسين جودة الخدمة</p>
+                                    <form method="POST" action="{{ route('client.requests.rate', $serviceRequest) }}">
+                                        @csrf
+                                        <div class="flex justify-center gap-2 mb-5">
+                                            @for($star = 1; $star <= 5; $star++)
+                                            <label class="cursor-pointer">
+                                                <input type="radio" name="rating" value="{{ $star }}" class="sr-only"
+                                                       x-on:change="rating = {{ $star }}" required>
+                                                <svg :class="rating >= {{ $star }} ? 'text-yellow-400' : 'text-gray-200'"
+                                                     class="w-10 h-10 transition-colors" fill="currentColor" viewBox="0 0 24 24">
+                                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                                </svg>
+                                            </label>
+                                            @endfor
+                                        </div>
+                                        <div class="flex gap-3">
+                                            <button type="button" @click="open = false"
+                                                    class="flex-1 border border-gray-200 text-gray-600 font-semibold py-2.5 rounded-xl text-sm hover:bg-gray-50 transition-colors">
+                                                لاحقاً
+                                            </button>
+                                            <button type="submit" :disabled="rating === 0"
+                                                    class="flex-1 bg-yellow-400 hover:bg-yellow-500 disabled:opacity-50 text-white font-bold py-2.5 rounded-xl text-sm transition-colors">
+                                                إرسال التقييم
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
                         </div>
                         @endif
                         @if($i === 6 && $serviceRequest->rating)
@@ -283,12 +316,19 @@
             <h3 class="font-bold text-accent text-sm mb-4">الصور والمرفقات</h3>
             <div class="grid grid-cols-3 sm:grid-cols-4 gap-3">
                 @foreach($serviceRequest->media as $media)
-                <a href="{{ $media->url ?? $media->original_url ?? '#' }}" target="_blank"
-                   class="aspect-square rounded-xl overflow-hidden bg-gray-100 block hover:opacity-90 transition-opacity">
-                    <img src="{{ $media->thumbnail_url ?? $media->url ?? $media->original_url }}"
-                         alt="صورة"
-                         class="w-full h-full object-cover" />
-                </a>
+                    @if($media->type === 'video')
+                    <a href="{{ $media->url }}" target="_blank"
+                       class="aspect-square rounded-xl overflow-hidden bg-gray-800 block hover:opacity-90 transition-opacity flex items-center justify-center">
+                        <svg class="w-10 h-10 text-white opacity-70" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M8 5v14l11-7z"/>
+                        </svg>
+                    </a>
+                    @else
+                    <a href="{{ $media->url }}" target="_blank"
+                       class="aspect-square rounded-xl overflow-hidden bg-gray-100 block hover:opacity-90 transition-opacity">
+                        <img src="{{ $media->url }}" alt="صورة" class="w-full h-full object-cover" />
+                    </a>
+                    @endif
                 @endforeach
             </div>
         </div>
@@ -314,14 +354,24 @@
                 </div>
                 <div>
                     <p class="font-black text-accent">{{ $serviceRequest->technician->name }}</p>
-                    <p class="text-xs text-gray-500 mt-0.5">{{ $serviceRequest->technician->specialization ?? $type['label'] }}</p>
+                    @php
+                    $techProfile = $serviceRequest->technician->technicianProfile;
+                    $techRating  = $techProfile?->rating_average ?? 5.0;
+                    $techSpecLabel = $type['label'];
+                    if ($techProfile?->specializations) {
+                        $specs = $techProfile->specializations;
+                        $specMap = ['plumbing'=>'سباكة','electrical'=>'كهرباء','hvac'=>'تكييف','general'=>'عام'];
+                        $techSpecLabel = implode('، ', array_map(fn($s) => $specMap[$s] ?? $s, array_slice((array)$specs, 0, 2)));
+                    }
+                @endphp
+                <p class="text-xs text-gray-500 mt-0.5">{{ $techSpecLabel }}</p>
                     <div class="flex items-center gap-1 mt-1">
                         @for($r = 1; $r <= 5; $r++)
-                        <svg class="w-3 h-3 {{ $r <= ($serviceRequest->technician->rating ?? 5) ? 'text-yellow-400' : 'text-gray-200' }}" fill="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-3 h-3 {{ $r <= round($techRating) ? 'text-yellow-400' : 'text-gray-200' }}" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                         </svg>
                         @endfor
-                        <span class="text-xs text-gray-500 mr-0.5">{{ number_format($serviceRequest->technician->rating ?? 4.9, 1) }}</span>
+                        <span class="text-xs text-gray-500 mr-0.5">{{ number_format($techRating, 1) }}</span>
                     </div>
                 </div>
             </div>
@@ -366,7 +416,7 @@
             <div class="space-y-3">
                 <div>
                     <p class="text-xs font-semibold text-gray-500 mb-1">وصف المشكلة</p>
-                    <p class="text-sm text-gray-700 leading-relaxed">{{ $initialReport->description }}</p>
+                    <p class="text-sm text-gray-700 leading-relaxed">{{ $initialReport->problem_description }}</p>
                 </div>
 
                 <div class="flex items-center gap-3">
@@ -379,7 +429,14 @@
                     @if($initialReport->estimated_duration)
                     <div class="flex-1">
                         <p class="text-xs font-semibold text-gray-500 mb-1">الوقت المتوقع</p>
-                        <p class="text-sm font-bold text-accent">{{ $initialReport->estimated_duration }}</p>
+                        <p class="text-sm font-bold text-accent">
+                            @if($initialReport->estimated_duration >= 60)
+                                {{ floor($initialReport->estimated_duration / 60) }} ساعة
+                                @if($initialReport->estimated_duration % 60) {{ $initialReport->estimated_duration % 60 }} دقيقة @endif
+                            @else
+                                {{ $initialReport->estimated_duration }} دقيقة
+                            @endif
+                        </p>
                     </div>
                     @endif
                 </div>
@@ -427,9 +484,9 @@
                 @if($serviceRequest->district), حي {{ $serviceRequest->district }}@endif
                 @if($serviceRequest->city)، {{ $serviceRequest->city }}@endif
             </p>
-            @if($serviceRequest->notes)
+            @if($serviceRequest->client_notes)
             <p class="text-xs text-gray-400 mt-2 bg-gray-50 rounded-lg px-3 py-2">
-                💬 {{ $serviceRequest->notes }}
+                💬 {{ $serviceRequest->client_notes }}
             </p>
             @endif
         </div>

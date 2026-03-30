@@ -32,4 +32,20 @@ class User extends Authenticatable
     public function primaryAddress() { return $this->hasOne(Address::class)->where('is_primary', true); }
     public function orders() { return $this->hasMany(Order::class); }
     public function referralsMade() { return $this->hasMany(Referral::class, 'referrer_id'); }
+
+    // Convenient accessors
+    public function getWalletBalanceAttribute(): float
+    {
+        return (float)($this->wallet->balance ?? 0);
+    }
+
+    public function getReferralCodeAttribute(): string
+    {
+        return (string) $this->id;
+    }
+
+    public function getReferralLinkAttribute(): string
+    {
+        return route('register', ['ref' => $this->id]);
+    }
 }

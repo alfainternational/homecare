@@ -58,13 +58,14 @@ class TaskController extends Controller
         $data = $request->validate([
             'problem_description' => 'required|string|max:2000',
             'severity'            => 'required|in:low,medium,high',
-            'estimated_duration'  => 'nullable|integer|min:1',
-            'parts_needed'        => 'nullable|string|max:1000',
+            'estimated_duration'  => 'nullable|integer|min:1|max:480',
+            'estimated_cost'      => 'nullable|numeric|min:0|max:99999',
+            'parts_needed'        => 'nullable|string|max:2000',
         ]);
 
         $partsArray = null;
         if (!empty($data['parts_needed'])) {
-            $partsArray = array_map('trim', explode("\n", $data['parts_needed']));
+            $partsArray = array_values(array_filter(array_map('trim', explode("\n", $data['parts_needed']))));
         }
 
         RequestReport::create([
@@ -74,7 +75,8 @@ class TaskController extends Controller
             'problem_description' => $data['problem_description'],
             'severity'            => $data['severity'],
             'estimated_duration'  => $data['estimated_duration'] ?? null,
-            'parts_needed'        => $partsArray ? json_encode($partsArray) : null,
+            'estimated_cost'      => $data['estimated_cost'] ?? null,
+            'parts_needed'        => $partsArray ?: null,
         ]);
         $serviceRequest->update(['status' => 'awaiting_approval']);
 
@@ -93,7 +95,7 @@ class TaskController extends Controller
             'request_id'          => $serviceRequest->id,
             'type'                => 'final',
             'reported_by'         => Auth::id(),
-            'problem_description' => $data['work_done'],
+            'problem_description' => $data['work_done'], // summary of work done
             'severity'            => 'low',
             'work_done'           => $data['work_done'],
             'recommendations'     => $data['recommendations'] ?? null,

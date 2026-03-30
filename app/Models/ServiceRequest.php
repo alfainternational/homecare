@@ -10,9 +10,14 @@ class ServiceRequest extends Model
     protected $fillable = [
         'request_number', 'client_id', 'technician_id', 'subscription_id',
         'service_type', 'status', 'description', 'voice_note_path',
-        'priority', 'scheduled_at', 'completed_at', 'client_notes', 'admin_notes'
+        'priority', 'scheduled_at', 'completed_at', 'client_notes', 'admin_notes',
+        'street', 'district', 'city', 'rating',
     ];
-    protected $casts = ['scheduled_at' => 'datetime', 'completed_at' => 'datetime'];
+    protected $casts = [
+        'scheduled_at' => 'datetime',
+        'completed_at' => 'datetime',
+        'rating'       => 'integer',
+    ];
 
     protected static function boot() {
         parent::boot();

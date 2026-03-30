@@ -13,16 +13,17 @@
 @section('content')
 
 @php
-    $visitsRemaining  = $user->subscription->visits_remaining  ?? 0;
-    $visitsTotal      = $user->subscription->visits_total       ?? 0;
-    $visitsUsed       = $visitsTotal - $visitsRemaining;
+    $sub              = $user->subscription;
+    $visitsRemaining  = $sub ? $sub->visitsRemaining() : 0;
+    $visitsTotal      = $sub->visits_total  ?? 0;
+    $visitsUsed       = $sub->visits_used   ?? 0;
     $visitsPercent    = $visitsTotal > 0 ? round(($visitsUsed / $visitsTotal) * 100) : 0;
-    $renewalDate      = $user->subscription->ends_at            ?? null;
-    $daysLeft         = $renewalDate ? max(0, now()->diffInDays($renewalDate, false)) : 0;
-    $planName         = $user->subscription->plan->name         ?? 'الباقة الأساسية';
-    $totalRequests    = $user->serviceRequests()->count()        ?? 0;
-    $walletBalance    = $user->wallet_balance                    ?? 0;
-    $referralCode     = $user->referral_code                    ?? 'REF-' . strtoupper(substr(md5($user->id), 0, 6));
+    $renewalDate      = $sub?->ends_at;
+    $daysLeft         = $renewalDate ? max(0, (int)now()->diffInDays($renewalDate, false)) : 0;
+    $planName         = $sub?->plan?->name_ar ?? 'لا يوجد اشتراك';
+    $totalRequests    = $user->serviceRequests()->count();
+    $walletBalance    = (float)($user->wallet?->balance ?? 0);
+    $referralLink     = route('register', ['ref' => $user->id]);
 @endphp
 
 {{-- ===== ROW 1: STAT CARDS ===== --}}
@@ -84,8 +85,12 @@
             </div>
             <span class="text-xs font-medium text-yellow-600 bg-yellow-50 px-2 py-0.5 rounded-full">ممتاز</span>
         </div>
-        <p class="text-3xl font-black text-accent mb-1">4.8</p>
-        <p class="text-sm text-gray-500 font-medium">متوسط التقييم</p>
+        @php
+            $avgRating = $user->serviceRequests()->whereNotNull('rating')->avg('rating');
+            $ratingCount = $user->serviceRequests()->whereNotNull('rating')->count();
+        @endphp
+        <p class="text-3xl font-black text-accent mb-1">{{ $avgRating ? number_format($avgRating, 1) : '—' }}</p>
+        <p class="text-sm text-gray-500 font-medium">متوسط التقييم @if($ratingCount) <span class="text-xs">({{ $ratingCount }} طلب)</span> @endif</p>
     </div>
 </div>
 
@@ -328,7 +333,7 @@
                         <input
                             type="text"
                             id="referralInput"
-                            value="{{ url('/register?ref=' . $referralCode) }}"
+                            value="{{ $referralLink }}"
                             readonly
                             class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-600 focus:outline-none focus:ring-2 focus:ring-brand/30 font-mono text-xs"
                         />

@@ -17,10 +17,16 @@ class StoreController extends Controller
         $query = Product::with('category')->where('is_active', true);
 
         if ($request->filled('category')) {
-            $query->where('category_id', $request->category);
+            $cats = array_filter((array)$request->category);
+            if (!empty($cats)) {
+                $query->whereIn('category_id', $cats);
+            }
         }
         if ($request->filled('search')) {
-            $query->where('name_ar', 'like', '%' . $request->search . '%');
+            $s = $request->search;
+            $query->where(function ($q) use ($s) {
+                $q->where('name_ar', 'like', "%{$s}%")->orWhere('name', 'like', "%{$s}%")->orWhere('brand', 'like', "%{$s}%");
+            });
         }
         if ($request->boolean('in_stock')) {
             $query->where('stock', '>', 0);

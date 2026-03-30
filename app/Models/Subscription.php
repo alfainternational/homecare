@@ -15,5 +15,6 @@ class Subscription extends Model
     public function serviceRequests() { return $this->hasMany(ServiceRequest::class); }
 
     public function visitsRemaining(): int { return max(0, $this->visits_total - $this->visits_used); }
-    public function isActive(): bool { return $this->status === 'active' && $this->ends_at->isFuture(); }
+    public function getVisitsRemainingAttribute(): int { return $this->visitsRemaining(); }
+    public function isActive(): bool { return $this->status === 'active' && $this->ends_at?->isFuture(); }
 }

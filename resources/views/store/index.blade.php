@@ -57,7 +57,7 @@
                 <label class="flex items-center justify-between cursor-pointer hover:bg-gray-50 rounded-lg p-1.5">
                   <div class="flex items-center gap-2">
                     <input type="checkbox" name="category[]" value="{{ $cat->id }}"
-                      {{ in_array($cat->id, (array)request('category')) ? 'checked' : '' }}
+                      {{ in_array((string)$cat->id, array_map('strval', (array)request('category', []))) ? 'checked' : '' }}
                       class="text-[#F5A623] border-gray-300 rounded"
                       onchange="document.getElementById('filterForm').submit()">
                     <span class="text-sm text-gray-700">{{ $cat->icon }} {{ $cat->name_ar }}</span>
@@ -102,7 +102,7 @@
               {{-- Image --}}
               <div class="relative bg-gray-100 h-48 flex items-center justify-center">
                 @if($product->image)
-                  <img src="{{ Storage::url($product->image) }}" alt="{{ $product->name_ar }}" class="w-full h-full object-cover">
+                  <img src="{{ $product->image_url }}" alt="{{ $product->name_ar }}" class="w-full h-full object-cover">
                 @else
                   <div class="text-5xl opacity-30">📦</div>
                 @endif

@@ -15,31 +15,30 @@
   @endif
 
   {{-- Stats --}}
-  @php
-    $active  = $subscriptions->where('status','active')->count();
-    $expired = $subscriptions->where('status','expired')->count();
-    $expiringSoon = $subscriptions->filter(fn($s) => $s->ends_at && $s->ends_at->diffInDays(now()) <= 30 && $s->status === 'active');
-  @endphp
-  <div class="grid grid-cols-3 gap-4">
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
     <div class="bg-green-50 border border-green-200 rounded-2xl p-5">
-      <div class="text-3xl font-black text-green-700">{{ $active }}</div>
+      <div class="text-3xl font-black text-green-700">{{ $stats['active'] }}</div>
       <div class="text-sm text-green-600 font-medium mt-1">نشط</div>
     </div>
     <div class="bg-red-50 border border-red-200 rounded-2xl p-5">
-      <div class="text-3xl font-black text-red-600">{{ $expired }}</div>
+      <div class="text-3xl font-black text-red-600">{{ $stats['expired'] }}</div>
       <div class="text-sm text-red-500 font-medium mt-1">منتهي</div>
     </div>
+    <div class="bg-gray-50 border border-gray-200 rounded-2xl p-5">
+      <div class="text-3xl font-black text-gray-600">{{ $stats['suspended'] }}</div>
+      <div class="text-sm text-gray-500 font-medium mt-1">معلق</div>
+    </div>
     <div class="bg-amber-50 border border-amber-200 rounded-2xl p-5">
-      <div class="text-3xl font-black text-amber-600">{{ $expiringSoon->count() }}</div>
+      <div class="text-3xl font-black text-amber-600">{{ $stats['expiring_soon'] }}</div>
       <div class="text-sm text-amber-500 font-medium mt-1">تنتهي خلال 30 يوم</div>
     </div>
   </div>
 
   {{-- Expiring soon warning --}}
-  @if($expiringSoon->count() > 0)
+  @if($stats['expiring_soon'] > 0)
     <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-center gap-3">
       <span class="text-amber-500 text-xl">⚠️</span>
-      <p class="text-amber-700 font-medium">{{ $expiringSoon->count() }} اشتراك تنتهي خلال 30 يوماً — يُنصح بالتواصل مع العملاء</p>
+      <p class="text-amber-700 font-medium">{{ $stats['expiring_soon'] }} اشتراك تنتهي خلال 30 يوماً — يُنصح بالتواصل مع العملاء</p>
     </div>
   @endif
 

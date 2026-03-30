@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\AssignTechnicianRequest;
 use App\Models\ServiceRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -49,11 +50,10 @@ class RequestController extends Controller
         return view('admin.requests.show', compact('serviceRequest', 'technicians'));
     }
 
-    public function assignTechnician(Request $request, ServiceRequest $serviceRequest)
+    public function assignTechnician(AssignTechnicianRequest $request, ServiceRequest $serviceRequest)
     {
-        $request->validate(['technician_id' => 'required|exists:users,id']);
         $serviceRequest->update([
-            'technician_id' => $request->technician_id,
+            'technician_id' => $request->validated()['technician_id'],
             'status'        => 'assigned',
         ]);
         return back()->with('success', 'تم تعيين الفني بنجاح.');

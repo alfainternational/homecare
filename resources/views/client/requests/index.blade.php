@@ -5,16 +5,6 @@
 @section('content')
 
 @php
-    $statusMap = [
-        'pending'           => ['label' => 'قيد الانتظار',    'class' => 'bg-yellow-100 text-yellow-800 border border-yellow-200'],
-        'assigned'          => ['label' => 'تم التعيين',       'class' => 'bg-blue-100 text-blue-800 border border-blue-200'],
-        'on_way'            => ['label' => 'في الطريق',         'class' => 'bg-blue-100 text-blue-800 border border-blue-200'],
-        'arrived'           => ['label' => 'وصل الفني',         'class' => 'bg-blue-100 text-blue-800 border border-blue-200'],
-        'in_progress'       => ['label' => 'جاري التنفيذ',      'class' => 'bg-blue-100 text-blue-800 border border-blue-200'],
-        'awaiting_approval' => ['label' => 'بانتظار الموافقة',  'class' => 'bg-purple-100 text-purple-800 border border-purple-200'],
-        'completed'         => ['label' => 'مكتمل',             'class' => 'bg-green-100 text-green-800 border border-green-200'],
-        'cancelled'         => ['label' => 'ملغي',              'class' => 'bg-red-100 text-red-800 border border-red-200'],
-    ];
     $typeMap = [
         'plumbing'   => ['label' => 'سباكة',  'icon' => '🔧', 'bg' => 'bg-blue-50'],
         'electrical' => ['label' => 'كهرباء', 'icon' => '⚡', 'bg' => 'bg-yellow-50'],
@@ -123,10 +113,7 @@
             </thead>
             <tbody class="divide-y divide-gray-50">
                 @foreach($requests as $request)
-                @php
-                    $status = $statusMap[$request->status] ?? ['label' => $request->status, 'class' => 'bg-gray-100 text-gray-700 border border-gray-200'];
-                    $type   = $typeMap[$request->service_type] ?? ['label' => $request->service_type, 'icon' => '🔨', 'bg' => 'bg-gray-50'];
-                @endphp
+                @php $type = $typeMap[$request->service_type] ?? ['label' => $request->service_type, 'icon' => '🔨', 'bg' => 'bg-gray-50']; @endphp
                 <tr class="hover:bg-gray-50/50 transition-colors">
                     <td class="px-5 py-4">
                         <span class="font-mono font-bold text-accent text-sm">
@@ -160,9 +147,7 @@
                         @endif
                     </td>
                     <td class="px-4 py-4">
-                        <span class="text-xs font-semibold px-3 py-1.5 rounded-full {{ $status['class'] }}">
-                            {{ $status['label'] }}
-                        </span>
+                        <x-status-badge :status="$request->status" />
                     </td>
                     <td class="px-4 py-4">
                         <a href="{{ route('client.requests.show', $request) }}"
@@ -183,10 +168,7 @@
     {{-- Mobile Cards --}}
     <div class="md:hidden space-y-3 mb-5">
         @foreach($requests as $request)
-        @php
-            $status = $statusMap[$request->status] ?? ['label' => $request->status, 'class' => 'bg-gray-100 text-gray-700 border border-gray-200'];
-            $type   = $typeMap[$request->service_type] ?? ['label' => $request->service_type, 'icon' => '🔨', 'bg' => 'bg-gray-50'];
-        @endphp
+        @php $type = $typeMap[$request->service_type] ?? ['label' => $request->service_type, 'icon' => '🔨', 'bg' => 'bg-gray-50']; @endphp
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
             <div class="flex items-start justify-between mb-3">
                 <div class="flex items-center gap-3">
@@ -200,9 +182,7 @@
                         </p>
                     </div>
                 </div>
-                <span class="text-xs font-semibold px-2.5 py-1 rounded-full {{ $status['class'] }}">
-                    {{ $status['label'] }}
-                </span>
+                <x-status-badge :status="$request->status" />
             </div>
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3 text-xs text-gray-500">

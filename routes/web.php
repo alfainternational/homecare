@@ -39,7 +39,8 @@ Route::get('/store/{product}', [StoreController::class, 'show'])->name('store.sh
 Route::post('/store/{product}/cart', [StoreController::class, 'addToCart'])->name('store.add-cart');
 Route::get('/cart', [StoreController::class, 'cart'])->name('store.cart');
 Route::delete('/cart/{id}', [StoreController::class, 'removeFromCart'])->name('store.remove-cart');
-Route::match(['get', 'post'], '/checkout', [StoreController::class, 'checkout'])->name('store.checkout')->middleware('auth');
+Route::get('/checkout', [StoreController::class, 'checkoutPage'])->name('store.checkout')->middleware('auth');
+Route::post('/checkout', [StoreController::class, 'checkout'])->name('store.checkout.post')->middleware('auth');
 
 // Client Dashboard
 Route::middleware(['auth', 'role:client,admin'])->prefix('dashboard')->name('client.')->group(function () {

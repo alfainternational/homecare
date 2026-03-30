@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Client\CheckoutRequest;
 use App\Models\Category;
 use App\Models\Order;
 use App\Models\Product;
@@ -91,26 +92,22 @@ class StoreController extends Controller
         return back()->with('success', 'تم حذف المنتج من السلة.');
     }
 
-    public function checkout(Request $request)
+    public function checkoutPage(Request $request)
+    {
+        $cart = session()->get('cart', []);
+        if (empty($cart)) {
+            return redirect()->route('store.index')->with('error', 'السلة فارغة.');
+        }
+        return view('store.checkout', ['cart' => $cart]);
+    }
+
+    public function checkout(CheckoutRequest $request)
     {
         $cart = session()->get('cart', []);
 
         if (empty($cart)) {
             return redirect()->route('store.index')->with('error', 'السلة فارغة.');
         }
-
-        // GET — show checkout page
-        if ($request->isMethod('get')) {
-            return view('store.checkout', ['cart' => $cart]);
-        }
-
-        // POST — process order
-        $request->validate([
-            'payment_method' => 'required|in:card,bank,tabby,tamara,wallet',
-            'name'           => 'required|string|max:255',
-            'phone'          => 'required|string|max:20',
-            'address'        => 'required|string|max:500',
-        ]);
 
         $user = Auth::user();
         $subtotal = collect($cart)->sum(fn ($item) => $item['price'] * $item['quantity']);

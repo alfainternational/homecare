@@ -12,20 +12,6 @@
 
 @section('content')
 
-@php
-    $sub              = $user->subscription;
-    $visitsRemaining  = $sub ? $sub->visitsRemaining() : 0;
-    $visitsTotal      = $sub->visits_total  ?? 0;
-    $visitsUsed       = $sub->visits_used   ?? 0;
-    $visitsPercent    = $visitsTotal > 0 ? round(($visitsUsed / $visitsTotal) * 100) : 0;
-    $renewalDate      = $sub?->ends_at;
-    $daysLeft         = $renewalDate ? max(0, (int)now()->diffInDays($renewalDate, false)) : 0;
-    $planName         = $sub?->plan?->name_ar ?? 'لا يوجد اشتراك';
-    $totalRequests    = $user->serviceRequests()->count();
-    $walletBalance    = (float)($user->wallet?->balance ?? 0);
-    $referralLink     = route('register', ['ref' => $user->id]);
-@endphp
-
 {{-- ===== ROW 1: STAT CARDS ===== --}}
 <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
 
@@ -85,10 +71,6 @@
             </div>
             <span class="text-xs font-medium text-yellow-600 bg-yellow-50 px-2 py-0.5 rounded-full">ممتاز</span>
         </div>
-        @php
-            $avgRating = $user->serviceRequests()->whereNotNull('rating')->avg('rating');
-            $ratingCount = $user->serviceRequests()->whereNotNull('rating')->count();
-        @endphp
         <p class="text-3xl font-black text-accent mb-1">{{ $avgRating ? number_format($avgRating, 1) : '—' }}</p>
         <p class="text-sm text-gray-500 font-medium">متوسط التقييم @if($ratingCount) <span class="text-xs">({{ $ratingCount }} طلب)</span> @endif</p>
     </div>
@@ -162,24 +144,13 @@
 
         @if($latestRequest)
         @php
-            $statusMap = [
-                'pending'           => ['label' => 'قيد الانتظار',    'class' => 'bg-yellow-100 text-yellow-800'],
-                'assigned'          => ['label' => 'تم التعيين',       'class' => 'bg-blue-100 text-blue-800'],
-                'on_way'            => ['label' => 'في الطريق',         'class' => 'bg-blue-100 text-blue-800'],
-                'arrived'           => ['label' => 'وصل الفني',         'class' => 'bg-blue-100 text-blue-800'],
-                'in_progress'       => ['label' => 'جاري التنفيذ',      'class' => 'bg-blue-100 text-blue-800'],
-                'awaiting_approval' => ['label' => 'بانتظار الموافقة',  'class' => 'bg-purple-100 text-purple-800'],
-                'completed'         => ['label' => 'مكتمل',             'class' => 'bg-green-100 text-green-800'],
-                'cancelled'         => ['label' => 'ملغي',              'class' => 'bg-red-100 text-red-800'],
-            ];
             $typeMap = [
                 'plumbing'   => ['label' => 'سباكة',   'icon' => '🔧'],
                 'electrical' => ['label' => 'كهرباء',  'icon' => '⚡'],
                 'hvac'       => ['label' => 'تكييف',   'icon' => '❄️'],
                 'general'    => ['label' => 'عام',     'icon' => '🏠'],
             ];
-            $status = $statusMap[$latestRequest->status] ?? ['label' => $latestRequest->status, 'class' => 'bg-gray-100 text-gray-800'];
-            $type   = $typeMap[$latestRequest->service_type] ?? ['label' => $latestRequest->service_type, 'icon'  => '🔨'];
+            $type = $typeMap[$latestRequest->service_type] ?? ['label' => $latestRequest->service_type, 'icon' => '🔨'];
         @endphp
 
         <div class="p-5">
@@ -196,9 +167,7 @@
                         </p>
                     </div>
                 </div>
-                <span class="text-xs font-semibold px-3 py-1.5 rounded-full {{ $status['class'] }}">
-                    {{ $status['label'] }}
-                </span>
+                <x-status-badge :status="$latestRequest->status" />
             </div>
 
             {{-- Details --}}

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Technician;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Technician\FinalReportRequest;
+use App\Http\Requests\Technician\InitialReportRequest;
 use App\Models\ServiceRequest;
 use App\Models\RequestReport;
 use Illuminate\Http\Request;
@@ -52,21 +54,9 @@ class TaskController extends Controller
         return back()->with('success', 'تم تحديث حالة الطلب.');
     }
 
-    public function submitInitialReport(Request $request, ServiceRequest $serviceRequest)
+    public function submitInitialReport(InitialReportRequest $request, ServiceRequest $serviceRequest)
     {
-        abort_if($serviceRequest->technician_id !== Auth::id(), 403);
-        $data = $request->validate([
-            'problem_description' => 'required|string|max:2000',
-            'severity'            => 'required|in:low,medium,high',
-            'estimated_duration'  => 'nullable|integer|min:1|max:480',
-            'estimated_cost'      => 'nullable|numeric|min:0|max:99999',
-            'parts_needed'        => 'nullable|string|max:2000',
-        ]);
-
-        $partsArray = null;
-        if (!empty($data['parts_needed'])) {
-            $partsArray = array_values(array_filter(array_map('trim', explode("\n", $data['parts_needed']))));
-        }
+        $data = $request->validated();
 
         RequestReport::create([
             'request_id'          => $serviceRequest->id,
@@ -76,26 +66,22 @@ class TaskController extends Controller
             'severity'            => $data['severity'],
             'estimated_duration'  => $data['estimated_duration'] ?? null,
             'estimated_cost'      => $data['estimated_cost'] ?? null,
-            'parts_needed'        => $partsArray ?: null,
+            'parts_needed'        => $request->parsedParts(),
         ]);
         $serviceRequest->update(['status' => 'awaiting_approval']);
 
         return back()->with('success', 'تم إرسال التقرير الأولي — بانتظار موافقة العميل.');
     }
 
-    public function submitFinalReport(Request $request, ServiceRequest $serviceRequest)
+    public function submitFinalReport(FinalReportRequest $request, ServiceRequest $serviceRequest)
     {
-        abort_if($serviceRequest->technician_id !== Auth::id(), 403);
-        $data = $request->validate([
-            'work_done'       => 'required|string|max:2000',
-            'recommendations' => 'nullable|string|max:1000',
-        ]);
+        $data = $request->validated();
 
         RequestReport::create([
             'request_id'          => $serviceRequest->id,
             'type'                => 'final',
             'reported_by'         => Auth::id(),
-            'problem_description' => $data['work_done'], // summary of work done
+            'problem_description' => $data['work_done'],
             'severity'            => 'low',
             'work_done'           => $data['work_done'],
             'recommendations'     => $data['recommendations'] ?? null,

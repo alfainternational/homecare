@@ -236,8 +236,12 @@
                             <div class="flex items-center gap-1.5">
                                 <button @click="toggleExpand({{ $request->id }})"
                                         class="text-xs font-semibold text-brand hover:text-brand-dark transition-colors px-2.5 py-1.5 rounded-lg hover:bg-brand-light">
-                                    التفاصيل
+                                    سريع
                                 </button>
+                                <a href="{{ route('admin.requests.show', $request) }}"
+                                   class="text-xs font-semibold text-white bg-brand hover:bg-brand-dark transition-colors px-2.5 py-1.5 rounded-lg">
+                                    عرض
+                                </a>
                             </div>
                         </td>
                     </tr>

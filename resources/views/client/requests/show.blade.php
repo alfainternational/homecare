@@ -59,7 +59,7 @@
     ];
 
     $status   = $statusMap[$serviceRequest->status] ?? ['label' => $serviceRequest->status, 'class' => 'bg-gray-100 text-gray-700 border border-gray-200'];
-    $type     = $typeMap[$serviceRequest->type]     ?? ['label' => $serviceRequest->type, 'icon' => '🔨'];
+    $type     = $typeMap[$serviceRequest->service_type] ?? ['label' => $serviceRequest->service_type, 'icon' => '🔨'];
     $reqNum   = $serviceRequest->request_number ?? str_pad($serviceRequest->id, 5, '0', STR_PAD_LEFT);
 
     // Determine active timeline step from status

@@ -125,7 +125,7 @@
                 @foreach($requests as $request)
                 @php
                     $status = $statusMap[$request->status] ?? ['label' => $request->status, 'class' => 'bg-gray-100 text-gray-700 border border-gray-200'];
-                    $type   = $typeMap[$request->type]     ?? ['label' => $request->type, 'icon' => '🔨', 'bg' => 'bg-gray-50'];
+                    $type   = $typeMap[$request->service_type] ?? ['label' => $request->service_type, 'icon' => '🔨', 'bg' => 'bg-gray-50'];
                 @endphp
                 <tr class="hover:bg-gray-50/50 transition-colors">
                     <td class="px-5 py-4">
@@ -185,7 +185,7 @@
         @foreach($requests as $request)
         @php
             $status = $statusMap[$request->status] ?? ['label' => $request->status, 'class' => 'bg-gray-100 text-gray-700 border border-gray-200'];
-            $type   = $typeMap[$request->type]     ?? ['label' => $request->type, 'icon' => '🔨', 'bg' => 'bg-gray-50'];
+            $type   = $typeMap[$request->service_type] ?? ['label' => $request->service_type, 'icon' => '🔨', 'bg' => 'bg-gray-50'];
         @endphp
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
             <div class="flex items-start justify-between mb-3">

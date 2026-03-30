@@ -131,4 +131,12 @@ class ServiceRequestController extends Controller
 
         return back()->with('success', 'شكراً لتقييمك! تقييمك يساعدنا على تحسين الخدمة.');
     }
+
+    public function destroy(ServiceRequest $serviceRequest)
+    {
+        abort_if($serviceRequest->client_id !== Auth::id(), 403);
+        abort_if(!in_array($serviceRequest->status, ['pending', 'cancelled']), 403, 'لا يمكن حذف طلب نشط.');
+        $serviceRequest->delete();
+        return redirect()->route('client.requests.index')->with('success', 'تم حذف الطلب بنجاح.');
+    }
 }

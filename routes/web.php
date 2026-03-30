@@ -51,6 +51,10 @@ Route::middleware(['auth', 'role:client,admin'])->prefix('dashboard')->name('cli
     Route::post('/requests/{serviceRequest}/approve', [ServiceRequestController::class, 'approveReport'])->name('requests.approve');
     Route::post('/requests/{serviceRequest}/reject', [ServiceRequestController::class, 'rejectReport'])->name('requests.reject');
     Route::post('/requests/{serviceRequest}/rate', [ServiceRequestController::class, 'rate'])->name('requests.rate');
+    // Aliases used in views
+    Route::post('/requests/{serviceRequest}/approve-report', [ServiceRequestController::class, 'approveReport'])->name('requests.approveReport');
+    Route::post('/requests/{serviceRequest}/reject-report', [ServiceRequestController::class, 'rejectReport'])->name('requests.rejectReport');
+    Route::delete('/requests/{serviceRequest}', [ServiceRequestController::class, 'destroy'])->name('requests.destroy');
     Route::get('/subscription', [SubscriptionController::class, 'index'])->name('subscription');
     Route::get('/wallet', [WalletController::class, 'index'])->name('wallet');
     Route::post('/wallet/refer', [WalletController::class, 'generateReferralLink'])->name('wallet.refer');

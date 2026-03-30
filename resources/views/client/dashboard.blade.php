@@ -174,7 +174,7 @@
                 'general'    => ['label' => 'عام',     'icon' => '🏠'],
             ];
             $status = $statusMap[$latestRequest->status] ?? ['label' => $latestRequest->status, 'class' => 'bg-gray-100 text-gray-800'];
-            $type   = $typeMap[$latestRequest->type]     ?? ['label' => $latestRequest->type,   'icon'  => '🔨'];
+            $type   = $typeMap[$latestRequest->service_type] ?? ['label' => $latestRequest->service_type, 'icon'  => '🔨'];
         @endphp
 
         <div class="p-5">

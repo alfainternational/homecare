@@ -11,8 +11,11 @@ class DatabaseSeeder extends Seeder
         $this->call([
             PlanSeeder::class,
             CategorySeeder::class,
+            ServiceCategorySeeder::class,
             ProductSeeder::class,
             UserSeeder::class,
+            PaymentGatewaySeeder::class,
+            PlatformSettingSeeder::class,
         ]);
     }
 }

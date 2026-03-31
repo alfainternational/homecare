@@ -69,15 +69,17 @@
       </p>
     </div>
 
-    {{-- Demo accounts --}}
+    {{-- Demo accounts: only shown in local/debug environment --}}
+    @if(config('app.debug'))
     <div class="mt-6 bg-orange-50 border border-orange-100 rounded-2xl p-4 text-sm">
-      <p class="font-bold text-orange-800 mb-2">حسابات تجريبية:</p>
+      <p class="font-bold text-orange-800 mb-2">⚠️ بيئة تطوير — حسابات تجريبية:</p>
       <div class="space-y-1 text-orange-700 font-mono text-xs">
         <p>👤 عميل: client@warmconcierge.com / password</p>
         <p>👷 فني: tech@warmconcierge.com / password</p>
         <p>⚙️ آدمن: admin@warmconcierge.com / password</p>
       </div>
     </div>
+    @endif
 
   </div>
 </div>

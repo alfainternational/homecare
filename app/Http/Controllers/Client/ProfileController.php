@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Client\UpdateProfileRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -12,21 +13,14 @@ class ProfileController extends Controller
 {
     public function edit()
     {
-        $user = Auth::user();
-        $addresses = $user->addresses;
+        $user      = Auth::user();
+        $addresses = $user->addresses()->orderByDesc('is_primary')->get();
         return view('client.profile', compact('user', 'addresses'));
     }
 
-    public function update(Request $request)
+    public function update(UpdateProfileRequest $request)
     {
-        $user = Auth::user();
-        $data = $request->validate([
-            'name'  => 'required|string|max:255',
-            'phone' => 'required|string|max:20',
-            'email' => 'required|email|unique:users,email,' . $user->id,
-        ]);
-        $user->update($data);
-
+        Auth::user()->update($request->validated());
         return back()->with('success', 'تم تحديث بياناتك بنجاح.');
     }
 
@@ -34,7 +28,12 @@ class ProfileController extends Controller
     {
         $request->validate([
             'current_password' => 'required',
-            'password'         => ['required', 'confirmed', Password::min(8)],
+            'password'         => ['required', 'confirmed', Password::min(8)
+                ->mixedCase()
+                ->numbers()],
+        ], [
+            'password.min'      => 'كلمة المرور يجب أن تكون 8 أحرف على الأقل.',
+            'password.confirmed'=> 'كلمة المرور غير متطابقة.',
         ]);
 
         $user = Auth::user();
@@ -44,7 +43,6 @@ class ProfileController extends Controller
         }
 
         $user->update(['password' => Hash::make($request->password)]);
-
         return back()->with('success', 'تم تغيير كلمة المرور بنجاح.');
     }
 }

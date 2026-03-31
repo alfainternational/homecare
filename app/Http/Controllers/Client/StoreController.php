@@ -122,6 +122,7 @@ class StoreController extends Controller
             }
         }
 
+        try {
         $order = DB::transaction(function () use ($cart, $user, $request, $subtotal, $tax, $total) {
             $order = Order::create([
                 'user_id'        => $user->id,
@@ -141,14 +142,22 @@ class StoreController extends Controller
             ]);
 
             foreach ($cart as $item) {
+                // Pessimistic lock: prevent concurrent checkout from overselling
+                $product = Product::lockForUpdate()->find($item['id']);
+
+                if (!$product || $product->stock < $item['quantity']) {
+                    throw new \RuntimeException(
+                        "المنتج «{$item['name']}» لا يتوفر منه المخزون الكافي. المتبقي: " . ($product->stock ?? 0)
+                    );
+                }
+
                 $order->items()->create([
-                    'product_id' => $item['id'],
+                    'product_id' => $product->id,
                     'quantity'   => $item['quantity'],
                     'unit_price' => $item['price'],
                 ]);
 
-                // Decrement stock
-                Product::where('id', $item['id'])->decrement('stock', $item['quantity']);
+                $product->decrement('stock', $item['quantity']);
             }
 
             // Wallet deduction
@@ -158,6 +167,9 @@ class StoreController extends Controller
 
             return $order;
         });
+        } catch (\RuntimeException $e) {
+            return back()->with('error', $e->getMessage());
+        }
 
         session()->forget('cart');
 

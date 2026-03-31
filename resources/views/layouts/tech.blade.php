@@ -5,28 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'لوحة الفني') — WarmConcierge</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#F5A623',
-                        'primary-dark': '#D4881A',
-                        'primary-light': '#FFF3DC',
-                        accent: '#2C2C2A',
-                    },
-                    fontFamily: { cairo: ['Cairo', 'sans-serif'] }
-                }
-            }
-        }
-    </script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <style>* { font-family: 'Cairo', sans-serif; }</style>
-    @stack('styles')
+    @include('layouts.partials.head')
 </head>
 <body class="bg-gray-50 text-[#2C2C2A] antialiased" x-data="{ sidebarOpen: false }">
 
